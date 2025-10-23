@@ -123,7 +123,6 @@ int main() {
         communityCards.push_back(deck.dealCard());
     }
 
-
     // Create Player Card 1
     sf::Texture card1;
     if (!card1.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[0].getID() + 1) + ".png")) {
@@ -240,7 +239,6 @@ int main() {
     result.setFillColor(sf::Color::White);
     result.setPosition(sf::Vector2f(320.f, 360.f));
 
-
     //Updating the game
     while (window.isOpen()) {
 
@@ -260,6 +258,10 @@ int main() {
                     {
                         std::cout << "Raise clicked!\n";
                         raise.setFillColor(sf::Color::Blue);
+
+                        pot += 50;
+                        playerMoney -= 50;
+
                         if (playerScore > dealerScore) {
                             GameState = 1;
                         }
@@ -286,6 +288,9 @@ int main() {
                     {
                         std::cout << "Check/Call clicked!\n";
                         check.setFillColor(sf::Color::Blue);
+
+                        pot += 50;
+                        playerMoney -= 50;
 
                         // Example: update game state as a call
                         if (playerScore > dealerScore) {
@@ -368,7 +373,6 @@ std::string handName(int score) {
     if (score >= 100) return "One Pair";
     return "High Card";
 }
-
 
 int rankValue(const std::string& rank) {
     std::map<std::string, int> values = {
