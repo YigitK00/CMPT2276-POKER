@@ -1,0 +1,51 @@
+# Visual Studio 2022
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Bb]in/
+[Oo]bj/
+Debug/
+Release/
+x64/
+x86/
+*.appx
+*.appxsym
+*.apk
+*.aab
+*.unitypackage
+
+# Visual Studio Code settings
+.vscode/
+
+# Rider IDE settings (if ever used)
+.idea/
+
+# NuGet packages
+*.nupkg
+*.snupkg
+packages/
+# The packages folder can be ignored because of PackageReference
+**/packages/*
+
+# Backup & auto-generated files
+*_i.c
+*_p.c
+*.ilk
+*.meta
+*.tmp
+*.log
+*.vspscc
+*.vssscc
+*.userprefs
+
+# SQL Server files
+*.mdf
+*.ldf
+
+# Others
+_ReSharper*/
+*.DotSettings.user
