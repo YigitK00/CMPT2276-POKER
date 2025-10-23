@@ -21,18 +21,26 @@ int main() {
 
     sf::RenderWindow window(sf::VideoMode({ 1280u, 720u }), "Poker");
 
-    //Raise, fold buttons
+    // Raise button
     sf::RectangleShape raise(sf::Vector2f(100.f, 100.f));
-    raise.setPosition(sf::Vector2f(100.f, 600.f));
+    raise.setPosition(sf::Vector2f(50.f, 600.f));
     raise.setFillColor(sf::Color::Green);
     raise.setOutlineColor(sf::Color::Black);
     raise.setOutlineThickness(4);
 
+    // Fold buttons
     sf::RectangleShape fold(sf::Vector2f(100.f, 100.f));
-    fold.setPosition(sf::Vector2f(250.f, 600.f));
+    fold.setPosition(sf::Vector2f(200.f, 600.f));
     fold.setFillColor(sf::Color::Red);
     fold.setOutlineColor(sf::Color::Black);
     fold.setOutlineThickness(4);
+
+    // Check/Call button
+    sf::RectangleShape check(sf::Vector2f(100.f, 100.f));
+    check.setPosition(sf::Vector2f(350.f, 600.f));
+    check.setFillColor(sf::Color::Yellow);
+    check.setOutlineColor(sf::Color::Black);
+    check.setOutlineThickness(4);
 
     // load font
     sf::Font font;
@@ -40,16 +48,7 @@ int main() {
         return -1;
     }
 
-    //Text for raise, fold buttons
-    sf::Text foldT(font);
-    foldT.setFont(font);
-    foldT.setString("FOLD");
-    foldT.setCharacterSize(28);
-    foldT.setOutlineColor(sf::Color::Black);
-    foldT.setOutlineThickness(2);
-    foldT.setFillColor(sf::Color::White);
-    foldT.setPosition(sf::Vector2f(260.f, 600.f));
-
+    // Text for Raise button
     sf::Text raiseT(font);
     raiseT.setFont(font);
     raiseT.setString("RAISE");
@@ -57,8 +56,27 @@ int main() {
     raiseT.setOutlineColor(sf::Color::Black);
     raiseT.setOutlineThickness(2);
     raiseT.setFillColor(sf::Color::White);
-    raiseT.setPosition(sf::Vector2f(110.f, 600.f));
+    raiseT.setPosition(sf::Vector2f(60.f, 600.f));
 
+    // Text for Fold button
+    sf::Text foldT(font);
+    foldT.setFont(font);
+    foldT.setString("FOLD");
+    foldT.setCharacterSize(28);
+    foldT.setOutlineColor(sf::Color::Black);
+    foldT.setOutlineThickness(2);
+    foldT.setFillColor(sf::Color::White);
+    foldT.setPosition(sf::Vector2f(210.f, 600.f));
+
+    // Text for Check/Call button
+    sf::Text checkT(font);
+    checkT.setFont(font);
+    checkT.setString("CHECK\n      /\n  CALL");
+    checkT.setCharacterSize(28);
+    checkT.setOutlineColor(sf::Color::Black);
+    checkT.setOutlineThickness(2);
+    checkT.setFillColor(sf::Color::White);
+    checkT.setPosition(sf::Vector2f(350.f, 600.f));
 
     //Set background table to table
     sf::Texture backgroundTexture;
@@ -242,7 +260,6 @@ int main() {
                             GameState = 3;
                     }
 
-
                     if (fold.getGlobalBounds().contains(
                         sf::Vector2f(static_cast<float>(mousePressed->position.x),
                             static_cast<float>(mousePressed->position.y))))
@@ -252,6 +269,26 @@ int main() {
                         fold.setFillColor(sf::Color::Blue);
                         GameState = 2;
                     }
+
+                    if (check.getGlobalBounds().contains(
+                        sf::Vector2f(static_cast<float>(mousePressed->position.x),
+                            static_cast<float>(mousePressed->position.y))))
+                    {
+                        std::cout << "Check/Call clicked!\n";
+                        check.setFillColor(sf::Color::Blue);
+
+                        // Example: update game state as a call
+                        if (playerScore > dealerScore) {
+                            GameState = 1; // player wins
+                        }
+                        else if (playerScore < dealerScore) {
+                            GameState = 2; // dealer wins
+                        }
+                        else {
+                            GameState = 3; // tie
+                        }
+                    }
+
                 }
             }
         }
@@ -272,12 +309,16 @@ int main() {
         window.draw(ccard4S);
         window.draw(ccard5S);
 
-        //Buttons and Text for these 
+        //Draw buttons 
         window.draw(raise);
         window.draw(fold);
 
         window.draw(foldT);
         window.draw(raiseT);
+
+        window.draw(check);
+        window.draw(checkT);
+
         //Draw Result
         if (GameState == 1) {
             result.setString("You Won!");
