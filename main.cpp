@@ -87,6 +87,14 @@ int main() {
     potText.setOutlineThickness(2);
     potText.setPosition(sf::Vector2(1050.f, 50.f));
 
+    // Text for player money
+    sf::Text playerMoneyText(font);
+    playerMoneyText.setFont(font);
+    playerMoneyText.setCharacterSize(28);
+    playerMoneyText.setFillColor(sf::Color::White);
+    playerMoneyText.setOutlineColor(sf::Color::Black);
+    playerMoneyText.setOutlineThickness(2);
+    playerMoneyText.setPosition(sf::Vector2(750.f, 600.f));
 
     //Set background table to table
     sf::Texture backgroundTexture;
@@ -111,6 +119,7 @@ int main() {
     int playerMoney = 100;
     int dealerMoney = 100;
     int pot = 0;
+    bool potAwarded = false;
 
     Deck deck;
     deck.shuffle();
@@ -132,7 +141,6 @@ int main() {
     sf::Sprite card1S(card1);
     card1S.setPosition(sf::Vector2f(500, 600));
     card1S.setScale(sf::Vector2f(.5, .5));
-
 
     // Create Player Card 2
     sf::Texture card2;
@@ -164,7 +172,6 @@ int main() {
     sf::Sprite Dcard2S(Dcard2);
     Dcard2S.setPosition(sf::Vector2f(600, 0));
     Dcard2S.setScale(sf::Vector2f(.5, .5));
-
 
     // Community Card 1
     sf::Texture ccard1;
@@ -254,7 +261,6 @@ int main() {
                     if (raise.getGlobalBounds().contains(
                         sf::Vector2f(static_cast<float>(mousePressed->position.x),
                             static_cast<float>(mousePressed->position.y))))
-
                     {
                         std::cout << "Raise clicked!\n";
                         raise.setFillColor(sf::Color::Blue);
@@ -275,7 +281,6 @@ int main() {
                     if (fold.getGlobalBounds().contains(
                         sf::Vector2f(static_cast<float>(mousePressed->position.x),
                             static_cast<float>(mousePressed->position.y))))
-
                     {
                         std::cout << "Fold clicked!\n";
                         fold.setFillColor(sf::Color::Blue);
@@ -308,8 +313,31 @@ int main() {
             }
         }
 
+        //player wins
+        if (GameState == 1) {
+            playerMoney += pot;
+            pot = 0;
+            potAwarded = true;
+        }
+        //dealer wins
+        else if (GameState == 2) {
+            dealerMoney += pot;
+            pot = 0;
+            potAwarded = true;
+        }
+        //tie
+        else if (GameState == 3) {
+            playerMoney += pot / 2;
+            dealerMoney += pot / 2;
+            pot = 0;
+            potAwarded = true;
+        }
+
         //Update pot text
         potText.setString("Pot: $" + std::to_string(pot));
+
+        //Update player money
+        playerMoneyText.setString("Your Money: $" + std::to_string(playerMoney));
 
         window.clear();
         window.draw(background);
@@ -339,6 +367,9 @@ int main() {
 
         //Draw pot
         window.draw(potText);
+
+        //Draw player money
+        window.draw(playerMoneyText);
 
         //Draw Result
         if (GameState == 1) {
