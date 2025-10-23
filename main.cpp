@@ -248,7 +248,7 @@ int main() {
                             static_cast<float>(mousePressed->position.y))))
 
                     {
-                        std::cout << "Button clicked!\n";
+                        std::cout << "Raise clicked!\n";
                         raise.setFillColor(sf::Color::Blue);
                         if (playerScore > dealerScore) {
                             GameState = 1;
@@ -265,7 +265,7 @@ int main() {
                             static_cast<float>(mousePressed->position.y))))
 
                     {
-                        std::cout << "Button clicked!\n";
+                        std::cout << "Fold clicked!\n";
                         fold.setFillColor(sf::Color::Blue);
                         GameState = 2;
                     }
