@@ -78,6 +78,16 @@ int main() {
     checkT.setFillColor(sf::Color::White);
     checkT.setPosition(sf::Vector2f(350.f, 600.f));
 
+    // Text for pot
+    sf::Text potText(font);
+    potText.setFont(font);
+    potText.setCharacterSize(32);
+    potText.setFillColor(sf::Color::White);
+    potText.setOutlineColor(sf::Color::Black);
+    potText.setOutlineThickness(2);
+    potText.setPosition(sf::Vector2(1050.f, 50.f));
+
+
     //Set background table to table
     sf::Texture backgroundTexture;
     if (!backgroundTexture.loadFromFile("pokertable.jpg")) {
@@ -293,6 +303,9 @@ int main() {
             }
         }
 
+        //Update pot text
+        potText.setString("Pot: $" + std::to_string(pot));
+
         window.clear();
         window.draw(background);
 
@@ -318,6 +331,9 @@ int main() {
 
         window.draw(check);
         window.draw(checkT);
+
+        //Draw pot
+        window.draw(potText);
 
         //Draw Result
         if (GameState == 1) {
