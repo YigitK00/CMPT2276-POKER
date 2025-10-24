@@ -6,6 +6,8 @@
 #include "Deck.h"
 #include <string>
 
+
+
 std::string handName(int score);
 int rankValue(const std::string& rank);
 int evaluateHand(const std::vector<Card>& cards);
@@ -94,6 +96,7 @@ int main() {
     playerMoneyText.setOutlineThickness(2);
     playerMoneyText.setPosition(sf::Vector2(750.f, 600.f));
 
+
     //Set background table to table
     sf::Texture backgroundTexture;
     if (!backgroundTexture.loadFromFile("pokertable.jpg")) {
@@ -130,6 +133,7 @@ int main() {
         communityCards.push_back(deck.dealCard());
     }
 
+
     // Create Player Card 1
     sf::Texture card1;
     if (!card1.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[0].getID() + 1) + ".png")) {
@@ -139,6 +143,7 @@ int main() {
     sf::Sprite card1S(card1);
     card1S.setPosition(sf::Vector2f(500, 600));
     card1S.setScale(sf::Vector2f(.5, .5));
+
 
     // Create Player Card 2
     sf::Texture card2;
@@ -231,7 +236,7 @@ int main() {
 
     std::vector<Card> dealerTotal = dealerHand;
     dealerTotal.insert(dealerTotal.end(), communityCards.begin(), communityCards.end());
-
+    
     int playerScore = evaluateHand(playerTotal);
     int dealerScore = evaluateHand(dealerTotal);
 
@@ -263,6 +268,7 @@ int main() {
     dealerhand.setOutlineThickness(5);
     dealerhand.setFillColor(sf::Color::White);
     dealerhand.setPosition(sf::Vector2f(560.f, 180.f));
+
 
     //Updating the game
     while (window.isOpen()) {
@@ -435,6 +441,7 @@ std::string handName(int score) {
     if (score >= 100) return "One Pair";
     return "High Card";
 }
+
 
 int rankValue(const std::string& rank) {
     std::map<std::string, int> values = {
