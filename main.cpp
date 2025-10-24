@@ -21,14 +21,13 @@ int main() {
 
     sf::RenderWindow window(sf::VideoMode({ 1280u, 720u }), "Poker");
 
-    // Raise button
+    //Raise, fold buttons
     sf::RectangleShape raise(sf::Vector2f(100.f, 100.f));
     raise.setPosition(sf::Vector2f(50.f, 600.f));
     raise.setFillColor(sf::Color::Green);
     raise.setOutlineColor(sf::Color::Black);
     raise.setOutlineThickness(4);
 
-    // Fold buttons
     sf::RectangleShape fold(sf::Vector2f(100.f, 100.f));
     fold.setPosition(sf::Vector2f(200.f, 600.f));
     fold.setFillColor(sf::Color::Red);
@@ -48,17 +47,7 @@ int main() {
         return -1;
     }
 
-    // Text for Raise button
-    sf::Text raiseT(font);
-    raiseT.setFont(font);
-    raiseT.setString("RAISE");
-    raiseT.setCharacterSize(28);
-    raiseT.setOutlineColor(sf::Color::Black);
-    raiseT.setOutlineThickness(2);
-    raiseT.setFillColor(sf::Color::White);
-    raiseT.setPosition(sf::Vector2f(60.f, 600.f));
-
-    // Text for Fold button
+    //Text for raise, fold buttons
     sf::Text foldT(font);
     foldT.setFont(font);
     foldT.setString("FOLD");
@@ -67,6 +56,15 @@ int main() {
     foldT.setOutlineThickness(2);
     foldT.setFillColor(sf::Color::White);
     foldT.setPosition(sf::Vector2f(210.f, 600.f));
+
+    sf::Text raiseT(font);
+    raiseT.setFont(font);
+    raiseT.setString("RAISE");
+    raiseT.setCharacterSize(28);
+    raiseT.setOutlineColor(sf::Color::Black);
+    raiseT.setOutlineThickness(2);
+    raiseT.setFillColor(sf::Color::White);
+    raiseT.setPosition(sf::Vector2f(60.f, 600.f));
 
     // Text for Check/Call button
     sf::Text checkT(font);
@@ -173,6 +171,7 @@ int main() {
     Dcard2S.setPosition(sf::Vector2f(600, 0));
     Dcard2S.setScale(sf::Vector2f(.5, .5));
 
+
     // Community Card 1
     sf::Texture ccard1;
     if (!ccard1.loadFromFile("./playing-cards-master/" + std::to_string(communityCards[0].getID() + 1) + ".png")) {
@@ -232,7 +231,7 @@ int main() {
 
     std::vector<Card> dealerTotal = dealerHand;
     dealerTotal.insert(dealerTotal.end(), communityCards.begin(), communityCards.end());
-    
+
     int playerScore = evaluateHand(playerTotal);
     int dealerScore = evaluateHand(dealerTotal);
 
@@ -245,6 +244,25 @@ int main() {
     result.setOutlineThickness(5);
     result.setFillColor(sf::Color::White);
     result.setPosition(sf::Vector2f(320.f, 360.f));
+
+    //Setup to display hands after playing
+    sf::Text playerhand(font);
+    playerhand.setFont(font);
+    playerhand.setCharacterSize(40);
+    playerhand.setString(handName(playerScore));
+    playerhand.setOutlineColor(sf::Color::Black);
+    playerhand.setOutlineThickness(5);
+    playerhand.setFillColor(sf::Color::White);
+    playerhand.setPosition(sf::Vector2f(560.f, 540.f));
+
+    sf::Text dealerhand(font);
+    dealerhand.setFont(font);
+    dealerhand.setCharacterSize(40);
+    dealerhand.setString(handName(dealerScore));
+    dealerhand.setOutlineColor(sf::Color::Black);
+    dealerhand.setOutlineThickness(5);
+    dealerhand.setFillColor(sf::Color::White);
+    dealerhand.setPosition(sf::Vector2f(560.f, 180.f));
 
     //Updating the game
     while (window.isOpen()) {
@@ -265,8 +283,9 @@ int main() {
                         std::cout << "Raise clicked!\n";
                         raise.setFillColor(sf::Color::Blue);
 
-                        pot += 50;
+                        pot += 100;
                         playerMoney -= 50;
+                        dealerMoney -= 50;
 
                         if (playerScore > dealerScore) {
                             GameState = 1;
@@ -278,15 +297,6 @@ int main() {
                             GameState = 3;
                     }
 
-                    if (fold.getGlobalBounds().contains(
-                        sf::Vector2f(static_cast<float>(mousePressed->position.x),
-                            static_cast<float>(mousePressed->position.y))))
-                    {
-                        std::cout << "Fold clicked!\n";
-                        fold.setFillColor(sf::Color::Blue);
-                        GameState = 2;
-                    }
-
                     if (check.getGlobalBounds().contains(
                         sf::Vector2f(static_cast<float>(mousePressed->position.x),
                             static_cast<float>(mousePressed->position.y))))
@@ -295,7 +305,8 @@ int main() {
                         check.setFillColor(sf::Color::Blue);
 
                         pot += 50;
-                        playerMoney -= 50;
+                        playerMoney -= 25;
+                        dealerMoney -= 25;
 
                         // Example: update game state as a call
                         if (playerScore > dealerScore) {
@@ -309,10 +320,18 @@ int main() {
                         }
                     }
 
+                    if (fold.getGlobalBounds().contains(
+                        sf::Vector2f(static_cast<float>(mousePressed->position.x),
+                            static_cast<float>(mousePressed->position.y))))
+
+                    {
+                        std::cout << "Button clicked!\n";
+                        fold.setFillColor(sf::Color::Blue);
+                        GameState = 2;
+                    }
                 }
             }
         }
-
         //player wins
         if (GameState == 1) {
             playerMoney += pot;
@@ -355,7 +374,7 @@ int main() {
         window.draw(ccard4S);
         window.draw(ccard5S);
 
-        //Draw buttons 
+        //Buttons and Text for these 
         window.draw(raise);
         window.draw(fold);
 
@@ -376,15 +395,27 @@ int main() {
             result.setString("You Won!");
             result.setFillColor(sf::Color::Green);
             window.draw(result);
+            window.draw(playerhand);
+            window.draw(dealerhand);
+            //Draw player money
+            window.draw(playerMoneyText);
         }
         else if (GameState == 2) {
             result.setString("The Dealer Won");
             result.setFillColor(sf::Color::Red);
             window.draw(result);
+            window.draw(playerhand);
+            window.draw(dealerhand);
+            //Draw player money
+            window.draw(playerMoneyText);
         }
         else if (GameState == 3) {
             result.setString("It is a tied!");
             window.draw(result);
+            window.draw(playerhand);
+            window.draw(dealerhand);
+            //Draw player money
+            window.draw(playerMoneyText);
         }
 
         window.display();
@@ -458,7 +489,7 @@ int evaluateHand(const std::vector<Card>& cards) {
                     std::find(valList.begin(), valList.end(), 10) != valList.end()) {
                     return 900; // Royal Flush
                 }
-                return 800; // Straight Flush
+                return 800 + valList.back(); // Straight Flush
             }
             return 500 + valList.back(); // Flush
         }
