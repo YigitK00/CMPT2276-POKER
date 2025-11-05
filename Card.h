@@ -9,6 +9,8 @@ public:
     std::string getSuit() const;
     int getID() const;
 
+
+    
 private:
     std::string rank;
     std::string suit;
