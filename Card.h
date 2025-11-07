@@ -14,4 +14,3 @@ private:
     std::string suit;
     int ID;
 };
-

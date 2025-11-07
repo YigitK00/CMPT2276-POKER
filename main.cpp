@@ -6,21 +6,15 @@
 #include "Deck.h"
 #include <string>
 
+
 std::string handName(int score);
 int rankValue(const std::string& rank);
 int evaluateHand(const std::vector<Card>& cards);
-/*
-    2. Make Buttons Functional
-        - Buttons ARE CLICKABLE RIGHT NOW
-            just need to match game state
-
-    3. Get random cards and draw them on screen in correct location
-
-*/
 int main() {
+    bool shouldDraw = false;  //THIS IS FOR THE HAND EVALUATION   
 
     sf::RenderWindow window(sf::VideoMode({ 1280u, 720u }), "Poker");
-
+    window.setFramerateLimit(60); //Performance reasons
     //Raise, fold buttons
     sf::RectangleShape raise(sf::Vector2f(100.f, 100.f));
     raise.setPosition(sf::Vector2f(50.f, 600.f));
@@ -40,6 +34,13 @@ int main() {
     check.setFillColor(sf::Color::Yellow);
     check.setOutlineColor(sf::Color::Black);
     check.setOutlineThickness(4);
+
+    // Hand_Rankings
+    sf::RectangleShape Hand_Rankings(sf::Vector2f(100.f, 100.f));
+    Hand_Rankings.setPosition(sf::Vector2f(1100.f, 600.f));
+    Hand_Rankings.setFillColor(sf::Color::Yellow);
+    Hand_Rankings.setOutlineColor(sf::Color::Black);
+    Hand_Rankings.setOutlineThickness(4);
 
     // load font
     sf::Font font;
@@ -76,6 +77,17 @@ int main() {
     checkT.setFillColor(sf::Color::White);
     checkT.setPosition(sf::Vector2f(350.f, 600.f));
 
+    // Text for Hand Rankings
+    sf::Text Hand_Rankings_Text(font);
+    Hand_Rankings_Text.setFont(font);
+    Hand_Rankings_Text.setString("HAND\n      \n Eval");
+    Hand_Rankings_Text.setCharacterSize(28);
+    Hand_Rankings_Text.setOutlineColor(sf::Color::Black);
+    Hand_Rankings_Text.setOutlineThickness(2);
+    Hand_Rankings_Text.setFillColor(sf::Color::White);
+    Hand_Rankings_Text.setPosition(sf::Vector2f(1110.f, 600.f));
+
+
     // Text for pot
     sf::Text potText(font);
     potText.setFont(font);
@@ -93,6 +105,7 @@ int main() {
     playerMoneyText.setOutlineColor(sf::Color::Black);
     playerMoneyText.setOutlineThickness(2);
     playerMoneyText.setPosition(sf::Vector2(750.f, 600.f));
+
 
     //Set background table to table
     sf::Texture backgroundTexture;
@@ -130,6 +143,7 @@ int main() {
         communityCards.push_back(deck.dealCard());
     }
 
+
     // Create Player Card 1
     sf::Texture card1;
     if (!card1.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[0].getID() + 1) + ".png")) {
@@ -139,6 +153,7 @@ int main() {
     sf::Sprite card1S(card1);
     card1S.setPosition(sf::Vector2f(500, 600));
     card1S.setScale(sf::Vector2f(.5, .5));
+
 
     // Create Player Card 2
     sf::Texture card2;
@@ -214,6 +229,8 @@ int main() {
     ccard4S.setPosition(sf::Vector2f(700, 270));
     ccard4S.setScale(sf::Vector2f(.5, .5));
 
+
+
     sf::Texture ccard5;
     if (!ccard5.loadFromFile("./playing-cards-master/" + std::to_string(communityCards[4].getID() + 1) + ".png")) {
         std::cerr << "Failed to load font\n";
@@ -223,6 +240,16 @@ int main() {
     sf::Sprite ccard5S(ccard5);
     ccard5S.setPosition(sf::Vector2f(850, 270));
     ccard5S.setScale(sf::Vector2f(.5, .5));
+
+    sf::Texture handRankingImage;
+    if (!handRankingImage.loadFromFile("i2.png")) {
+        std::cerr << "Failed to load Hand Ranking Image\n";
+        return -1;
+    }
+
+    sf::Sprite HandRanking(handRankingImage);
+    HandRanking.setPosition(sf::Vector2f(100, 100));
+    HandRanking.setScale(sf::Vector2f(2, 2));
 
     //Evaluate the player and the dealer hands
 
@@ -263,6 +290,7 @@ int main() {
     dealerhand.setOutlineThickness(5);
     dealerhand.setFillColor(sf::Color::White);
     dealerhand.setPosition(sf::Vector2f(560.f, 180.f));
+
 
     //Updating the game
     while (window.isOpen()) {
@@ -320,14 +348,37 @@ int main() {
                         }
                     }
 
+                    if (Hand_Rankings.getGlobalBounds().contains(
+                        sf::Vector2f(static_cast<float>(mousePressed->position.x),
+                            static_cast<float>(mousePressed->position.y))))
+                    {
+                        std::cout << "Hand Eval clicked!\n";
+                        check.setFillColor(sf::Color::Blue);
+
+                        if (shouldDraw == false)
+                            shouldDraw = true;
+                        else
+                            shouldDraw = false;
+                    }
+
                     if (fold.getGlobalBounds().contains(
                         sf::Vector2f(static_cast<float>(mousePressed->position.x),
                             static_cast<float>(mousePressed->position.y))))
 
                     {
-                        std::cout << "Button clicked!\n";
+                        std::cout << "Fold clicked!\n";
                         fold.setFillColor(sf::Color::Blue);
                         GameState = 2;
+                    }
+
+                    if (Hand_Rankings.getGlobalBounds().contains(
+                        sf::Vector2f(static_cast<float>(mousePressed->position.x),
+                            static_cast<float>(mousePressed->position.y))))
+
+                    {
+                        std::cout << "Button clicked!\n";
+                        Hand_Rankings.setFillColor(sf::Color::Blue);
+
                     }
                 }
             }
@@ -384,6 +435,12 @@ int main() {
         window.draw(check);
         window.draw(checkT);
 
+        window.draw(Hand_Rankings);
+        window.draw(Hand_Rankings_Text);
+
+        if (shouldDraw)
+            window.draw(HandRanking);
+
         //Draw pot
         window.draw(potText);
 
@@ -435,6 +492,7 @@ std::string handName(int score) {
     if (score >= 100) return "One Pair";
     return "High Card";
 }
+
 
 int rankValue(const std::string& rank) {
     std::map<std::string, int> values = {
