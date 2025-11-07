@@ -6,7 +6,6 @@
 #include "Deck.h"
 #include <string>
 
-
 std::string handName(int score);
 int rankValue(const std::string& rank);
 int evaluateHand(const std::vector<Card>& cards);
@@ -258,7 +257,7 @@ int main() {
 
     std::vector<Card> dealerTotal = dealerHand;
     dealerTotal.insert(dealerTotal.end(), communityCards.begin(), communityCards.end());
-
+    
     int playerScore = evaluateHand(playerTotal);
     int dealerScore = evaluateHand(dealerTotal);
 
