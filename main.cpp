@@ -134,13 +134,16 @@ int main() {
     Deck deck;
     deck.shuffle();
 
-    std::vector<Card> playerHand = { deck.dealCard(), deck.dealCard() };
-    std::vector<Card> dealerHand = { deck.dealCard(), deck.dealCard() };
-    std::vector<Card> communityCards;
-
+    std::vector<Card> playerHand;
+    std::vector<Card> dealerHand;
+ 
     for (int i = 0; i < 5; ++i) {
-        communityCards.push_back(deck.dealCard());
+        playerHand.push_back(deck.dealCard());
     }
+    for (int i = 0; i < 5; ++i) {
+        dealerHand.push_back(deck.dealCard());
+    }
+  
 
 
     // Create Player Card 1
@@ -161,9 +164,39 @@ int main() {
         return -1;
     }
     sf::Sprite card2S(card2);
-    card2S.setPosition(sf::Vector2f(600, 600));
+    card2S.setPosition(sf::Vector2f(525, 600));
     card2S.setScale(sf::Vector2f(.5, .5));
 
+    // Create Player Card 3
+    sf::Texture card3;
+    if (!card3.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[2].getID() + 1) + ".png")) {
+        std::cerr << "Failed to load font\n";
+        return -1;
+    }
+    sf::Sprite card3S(card3);
+    card3S.setPosition(sf::Vector2f(550, 600));
+    card3S.setScale(sf::Vector2f(.5, .5));
+
+    // Create Player Card 4
+    sf::Texture card4;
+    if (!card4.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[3].getID() + 1) + ".png")) {
+        std::cerr << "Failed to load font\n";
+        return -1;
+    }
+    sf::Sprite card4S(card4);
+    card4S.setPosition(sf::Vector2f(575, 600));
+    card4S.setScale(sf::Vector2f(.5, .5));
+
+    // Create Player Card 5
+    sf::Texture card5;
+    if (!card5.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[4].getID() + 1) + ".png")) {
+        std::cerr << "Failed to load font\n";
+        return -1;
+    }
+    sf::Sprite card5S(card5);
+    card5S.setPosition(sf::Vector2f(600, 600));
+    card5S.setScale(sf::Vector2f(.5, .5));
+    
     // Create Dealer Card 1
     sf::Texture Dcard1;
     if (!Dcard1.loadFromFile("./playing-cards-master/" + std::to_string(dealerHand[0].getID() + 1) + ".png")) {
@@ -182,64 +215,44 @@ int main() {
     }
 
     sf::Sprite Dcard2S(Dcard2);
-    Dcard2S.setPosition(sf::Vector2f(600, 0));
+    Dcard2S.setPosition(sf::Vector2f(525, 0));
     Dcard2S.setScale(sf::Vector2f(.5, .5));
 
-
-    // Community Card 1
-    sf::Texture ccard1;
-    if (!ccard1.loadFromFile("./playing-cards-master/" + std::to_string(communityCards[0].getID() + 1) + ".png")) {
+    // Create Dealer Card 3
+    sf::Texture Dcard3;
+    if (!Dcard3.loadFromFile("./playing-cards-master/" + std::to_string(dealerHand[2].getID() + 1) + ".png")) {
         std::cerr << "Failed to load font\n";
         return -1;
     }
 
-    sf::Sprite ccard1S(ccard1);
-    ccard1S.setPosition(sf::Vector2f(250, 270));
-    ccard1S.setScale(sf::Vector2f(.5, .5));
+    sf::Sprite Dcard3S(Dcard3);
+    Dcard3S.setPosition(sf::Vector2f(550, 0));
+    Dcard3S.setScale(sf::Vector2f(.5, .5));
 
-    // Community 2
-    sf::Texture ccard2;
-    if (!ccard2.loadFromFile("./playing-cards-master/" + std::to_string(communityCards[1].getID() + 1) + ".png")) {
-        std::cerr << "Failed to load font\n";
-        return -1;
-    }
-    sf::Sprite ccard2S(ccard2);
-    ccard2S.setPosition(sf::Vector2f(400, 270));
-    ccard2S.setScale(sf::Vector2f(.5, .5));
-
-    // Community 3
-    sf::Texture ccard3;
-    if (!ccard3.loadFromFile("./playing-cards-master/" + std::to_string(communityCards[2].getID() + 1) + ".png")) {
+    // Create Dealer Card 4
+    sf::Texture Dcard4;
+    if (!Dcard4.loadFromFile("./playing-cards-master/" + std::to_string(dealerHand[3].getID() + 1) + ".png")) {
         std::cerr << "Failed to load font\n";
         return -1;
     }
 
-    sf::Sprite ccard3S(ccard3);
-    ccard3S.setPosition(sf::Vector2f(550, 270));
-    ccard3S.setScale(sf::Vector2f(.5, .5));
+    sf::Sprite Dcard4S(Dcard4);
+    Dcard4S.setPosition(sf::Vector2f(575, 0));
+    Dcard4S.setScale(sf::Vector2f(.5, .5));
 
-    sf::Texture ccard4;
-    if (!ccard4.loadFromFile("./playing-cards-master/" + std::to_string(communityCards[3].getID() + 1) + ".png")) {
+    // Create Dealer Card 5
+    sf::Texture Dcard5;
+    if (!Dcard5.loadFromFile("./playing-cards-master/" + std::to_string(dealerHand[4].getID() + 1) + ".png")) {
         std::cerr << "Failed to load font\n";
         return -1;
     }
 
-    sf::Sprite ccard4S(ccard4);
-    ccard4S.setPosition(sf::Vector2f(700, 270));
-    ccard4S.setScale(sf::Vector2f(.5, .5));
+    sf::Sprite Dcard5S(Dcard5);
+    Dcard5S.setPosition(sf::Vector2f(600, 0));
+    Dcard5S.setScale(sf::Vector2f(.5, .5));
 
 
-
-    sf::Texture ccard5;
-    if (!ccard5.loadFromFile("./playing-cards-master/" + std::to_string(communityCards[4].getID() + 1) + ".png")) {
-        std::cerr << "Failed to load font\n";
-        return -1;
-    }
-
-    sf::Sprite ccard5S(ccard5);
-    ccard5S.setPosition(sf::Vector2f(850, 270));
-    ccard5S.setScale(sf::Vector2f(.5, .5));
-
+   //Hand Ranking helper
     sf::Texture handRankingImage;
     if (!handRankingImage.loadFromFile("i2.png")) {
         std::cerr << "Failed to load Hand Ranking Image\n";
@@ -253,10 +266,8 @@ int main() {
     //Evaluate the player and the dealer hands
 
     std::vector<Card> playerTotal = playerHand;
-    playerTotal.insert(playerTotal.end(), communityCards.begin(), communityCards.end());
 
     std::vector<Card> dealerTotal = dealerHand;
-    dealerTotal.insert(dealerTotal.end(), communityCards.begin(), communityCards.end());
     
     int playerScore = evaluateHand(playerTotal);
     int dealerScore = evaluateHand(dealerTotal);
@@ -414,15 +425,16 @@ int main() {
         //Draw Cards
         window.draw(card1S);
         window.draw(card2S);
+        window.draw(card3S);
+        window.draw(card4S);
+        window.draw(card5S);
 
         window.draw(Dcard1S);
         window.draw(Dcard2S);
+        window.draw(Dcard3S);
+        window.draw(Dcard4S);
+        window.draw(Dcard5S);
 
-        window.draw(ccard1S);
-        window.draw(ccard2S);
-        window.draw(ccard3S);
-        window.draw(ccard4S);
-        window.draw(ccard5S);
 
         //Buttons and Text for these 
         window.draw(raise);
