@@ -12,7 +12,7 @@ int evaluateHand(const std::vector<Card>& cards);
 int main() {
     bool shouldDraw = false;  //THIS IS FOR THE HAND EVALUATION  
 
-    bool isSelected[5] = { false, false, false, false, false };
+
     bool drawOutline[5] = { false, false , false, false, false };
 
     unsigned int cardsSelected = 0;
@@ -437,7 +437,7 @@ int main() {
                             drawOutline[0] = false;
                             cardsSelected--;
                         }
-                        if (cardsSelected < 3) {
+                        else if (cardsSelected < 3) {
                             drawOutline[0] = true;
                             cardsSelected++;
                         }
@@ -452,7 +452,7 @@ int main() {
                             drawOutline[1] = false;
                             cardsSelected--;
                         }
-                        if (cardsSelected < 3) {
+                        else if (cardsSelected < 3) {
                             drawOutline[1] = true;
                             cardsSelected++;
                         }
@@ -467,7 +467,7 @@ int main() {
                             drawOutline[2] = false;
                             cardsSelected--;
                         }
-                        if (cardsSelected < 3) {
+                        else if (cardsSelected < 3) {
                             drawOutline[2] = true;
                             cardsSelected++;
                         }
@@ -482,7 +482,7 @@ int main() {
                             drawOutline[3] = false;
                             cardsSelected--;
                         }
-                        if (cardsSelected < 3) {
+                        else if (cardsSelected < 3) {
                             drawOutline[3] = true;
                             cardsSelected++;
                         }
@@ -497,7 +497,7 @@ int main() {
                             drawOutline[4] = false;
                             cardsSelected--;
                         }
-                        if (cardsSelected < 3) {
+                        else if (cardsSelected < 3) {
                             drawOutline[4] = true;
                             cardsSelected++;
                         }
@@ -545,6 +545,22 @@ int main() {
         //window.draw(c4_Outline);
         //window.draw(c5_Outline);
 
+        if (shouldDraw)
+            window.draw(HandRanking);
+
+        if (drawOutline[0])
+            window.draw(c1_Outline);
+
+        if (drawOutline[1])
+            window.draw(c2_Outline);
+
+        if (drawOutline[2])
+            window.draw(c3_Outline);
+        if (drawOutline[3])
+            window.draw(c4_Outline);
+
+        if (drawOutline[4])
+            window.draw(c5_Outline);
 
         //Draw Cards
         window.draw(card1S);
@@ -553,11 +569,13 @@ int main() {
         window.draw(card4S);
         window.draw(card5S);
 
+
         window.draw(Dcard1S);
         window.draw(Dcard2S);
         window.draw(Dcard3S);
         window.draw(Dcard4S);
         window.draw(Dcard5S);
+
 
         //Buttons and Text for these 
         window.draw(raise);
@@ -575,23 +593,6 @@ int main() {
         window.draw(Help);
         window.draw(HelpText);
 
-
-        if (shouldDraw)
-            window.draw(HandRanking);
-
-        if (drawOutline[0])
-            window.draw(c1_Outline);
-
-        if (drawOutline[1])
-            window.draw(c2_Outline);
-
-        if (drawOutline[2])
-            window.draw(c3_Outline);
-        if (drawOutline[3])
-            window.draw(c4_Outline);
-
-        if (drawOutline[4])
-            window.draw(c5_Outline);
 
         //Draw pot
         window.draw(potText);
