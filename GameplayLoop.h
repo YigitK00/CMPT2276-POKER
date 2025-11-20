@@ -2,13 +2,16 @@
 #include <iostream>
 #include <vector>
 #include "Deck.h"
+#include <random>
 #include <string>
 #include <algorithm>
 #include <map>
+#include <SFML/Graphics.hpp>
 
 int evaluateHand(const std::vector<Card>& cards);
 int rankValue(const std::string& rank);
 void resetRound(int gameState, Deck& newDeck, std::vector<Card>& newPhand, std::vector<Card>& newDhand);
+int dealerLogic(int dealerScore, sf::Text& decision);
 
 //Game Logic Functions
 std::string handName(int score) {
@@ -144,4 +147,57 @@ void resetRound(int gameState, Deck& newDeck, std::vector<Card>& newPhand, std::
     for (int i = 0; i < 5; i++) {
         newDhand[i] = newDeck.dealCard();
     }
+}
+
+int dealerLogic(int dealerScore, sf::Text& decision)
+{
+    std::random_device rd; // obtain a random number from hardware
+    std::mt19937 gen(rd()); // seed the generator
+    std::uniform_int_distribution<> distr(1, 100); // define the range
+    int dice = distr(gen);
+    if (dealerScore < 106) {
+        if (dice <= 75) {
+            decision.setString("dealer's folded");
+            return 0;
+        }
+        else{
+            decision.setString("dealer's checked");
+            return 1;
+        }
+    }
+    else if (dealerScore < 300) {
+        if (dice <= 75) {
+            decision.setString("dealer's checked");
+            return 1;
+        }
+        else {
+            decision.setString("dealer's raised");
+            return 2;
+        }
+    }
+    else if (dealerScore < 400) {
+        if (dice <= 50) {
+            decision.setString("dealer's checked");
+            return 1;
+        }
+        else {
+            decision.setString("dealer's raised");
+            return 2;
+        }
+    }
+    else if (dealerScore < 500) {
+        if (dice <= 25) {
+            decision.setString("dealer's checked");
+            return 1;
+        }
+        else {
+            decision.setString("dealer's raised");
+            return 2;
+        }
+    }
+    else if (dealerScore > 500) {
+        decision.setString("dealer's raised");
+        return 2;
+    }
+    return 0;
 }

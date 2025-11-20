@@ -3,6 +3,8 @@
 #include <algorithm>
 #include "Deck.h"
 #include "GameplayLoop.h"
+#include <thread>
+#include <chrono>
 
 std::string handName(int score);
 int rankValue(const std::string& rank);
@@ -166,7 +168,7 @@ int main() {
     int GameState = 0; // 0 means nothing, 1 is win, 2 is lose, 3 is tied
     int playerMoney = 100;
     int dealerMoney = 99999999;
-    int pot = 0;
+    int pot = 50;
     bool discarded = 0;
     bool potAwarded = false;
     std::vector<bool> enabledCard(5, false);
@@ -364,7 +366,22 @@ int main() {
     dealerhand.setFillColor(sf::Color::White);
     dealerhand.setPosition(sf::Vector2f(560.f, 180.f));
 
+    //Dealer's Decision
+    sf::Text dealerDecision(font);
+    dealerDecision.setFont(font);
+    dealerDecision.setCharacterSize(40);
+    dealerDecision.setString("Thinking...");
+    dealerDecision.setOutlineColor(sf::Color::Black);
+    dealerDecision.setOutlineThickness(5);
+    dealerDecision.setFillColor(sf::Color::White);
+    dealerDecision.setPosition(sf::Vector2f(560.f, 180.f));
 
+    int dealerChoice = dealerLogic(dealerScore, dealerDecision);
+    if (dealerChoice == 0) {
+        GameState = 1;
+    }
+    
+    
     //Updating the game
     while (window.isOpen()) {
 
@@ -372,8 +389,7 @@ int main() {
         {
             if (event->is<sf::Event::Closed>())
                 window.close();
-
-            if (const auto* mousePressed = event->getIf<sf::Event::MouseButtonPressed>()) {
+            else if (const auto* mousePressed = event->getIf<sf::Event::MouseButtonPressed>()) {
                 if (mousePressed->button == sf::Mouse::Button::Left) {
 
                     // Check if the click is inside the button
@@ -573,6 +589,9 @@ int main() {
                         sf::Vector2f(static_cast<float>(mousePressed->position.x),
                             static_cast<float>(mousePressed->position.y))))
                     {
+                        pot += 50;
+                        playerMoney -= 25;
+                        dealerMoney -= 25;
                         GameState = 0;
                         discarded = 0;
                         deck.shuffle();
@@ -583,6 +602,11 @@ int main() {
                         
                         playerScore = evaluateHand(playerHand);
                         dealerScore = evaluateHand(dealerHand);
+                        dealerChoice = dealerLogic(dealerScore, dealerDecision);
+                        //Dealer's outcome
+                        if (dealerChoice == 0) {
+                            GameState = 1;
+                        }
                         dealerhand.setString(handName(dealerScore));
                         playerhand.setString(handName(playerScore));
                         if (!card1.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[0].getID() + 1) + ".png")) {
@@ -613,6 +637,7 @@ int main() {
                 }
             }
         }
+        
         //player wins
         if (GameState == 1) {
             playerMoney += pot;
@@ -702,6 +727,7 @@ int main() {
         window.draw(Discard);
         window.draw(Discard_Text);
 
+        window.draw(dealerDecision);
 
 
       
