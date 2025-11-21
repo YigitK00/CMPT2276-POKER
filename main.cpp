@@ -82,7 +82,7 @@ int main() {
 
     sf::Text raiseT(font);
     raiseT.setFont(font);
-    raiseT.setString("RAISE");
+    raiseT.setString("RAISE \n (-50$)");
     raiseT.setCharacterSize(28);
     raiseT.setOutlineColor(sf::Color::Black);
     raiseT.setOutlineThickness(2);
@@ -92,7 +92,7 @@ int main() {
     // Text for Check/Call button
     sf::Text checkT(font);
     checkT.setFont(font);
-    checkT.setString("CHECK\n      /\n  CALL");
+    checkT.setString("CHECK\n      /\nCALL(-25$) \n");
     checkT.setCharacterSize(28);
     checkT.setOutlineColor(sf::Color::Black);
     checkT.setOutlineThickness(2);
