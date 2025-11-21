@@ -1,10 +1,10 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
-#include <vector>
-#include <map>
 #include <algorithm>
 #include "Deck.h"
-#include <string>
+#include "GameplayLoop.h"
+#include <thread>
+#include <chrono>
 
 std::string handName(int score);
 int rankValue(const std::string& rank);
@@ -39,7 +39,18 @@ int main() {
     check.setFillColor(sf::Color::Yellow);
     check.setOutlineColor(sf::Color::Black);
     check.setOutlineThickness(4);
-
+    //New round button
+    sf::RectangleShape reset(sf::Vector2f(100.f, 100.f));
+    reset.setPosition(sf::Vector2f(640.f, 300.f));
+    reset.setFillColor(sf::Color::Green);
+    reset.setOutlineColor(sf::Color::Black);
+    reset.setOutlineThickness(4);
+    //Discard button
+    sf::RectangleShape Discard(sf::Vector2f(100.f, 100.f));
+    Discard.setPosition(sf::Vector2f(1100.f, 400.f));
+    Discard.setFillColor(sf::Color::Yellow);
+    Discard.setOutlineColor(sf::Color::Black);
+    Discard.setOutlineThickness(4);
     // Hand_Rankings
     sf::RectangleShape Hand_Rankings(sf::Vector2f(100.f, 100.f));
     Hand_Rankings.setPosition(sf::Vector2f(1100.f, 600.f));
@@ -148,22 +159,27 @@ int main() {
     // Game Start here
     int GameState = 0; // 0 means nothing, 1 is win, 2 is lose, 3 is tied
     int playerMoney = 100;
-    int dealerMoney = 100;
-    int pot = 0;
+    int dealerMoney = 99999999;
+    int pot = 50;
+    bool discarded = 0;
     bool potAwarded = false;
+    std::vector<bool> enabledCard(5, false);
 
     Deck deck;
     deck.shuffle();
 
-    std::vector<Card> playerHand = { deck.dealCard(), deck.dealCard() };
-    std::vector<Card> dealerHand = { deck.dealCard(), deck.dealCard() };
-    std::vector<Card> communityCards;
+    std::vector<Card> playerHand;
+    std::vector<Card> dealerHand;
 
     for (int i = 0; i < 5; ++i) {
-        communityCards.push_back(deck.dealCard());
+        playerHand.push_back(deck.dealCard());
+    }
+    for (int i = 0; i < 5; ++i) {
+        dealerHand.push_back(deck.dealCard());
     }
 
-
+    std::vector<sf::Texture> playerTextures;
+    
     // Create Player Card 1
     sf::Texture card1;
     if (!card1.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[0].getID() + 1) + ".png")) {
@@ -309,8 +325,6 @@ int main() {
 
     //Evaluate the player and the dealer hands
 
-    std::vector<Card> playerTotal = playerHand;
-    playerTotal.insert(playerTotal.end(), communityCards.begin(), communityCards.end());
 
     std::vector<Card> dealerTotal = dealerHand;
     dealerTotal.insert(dealerTotal.end(), communityCards.begin(), communityCards.end());
@@ -347,7 +361,22 @@ int main() {
     dealerhand.setFillColor(sf::Color::White);
     dealerhand.setPosition(sf::Vector2f(560.f, 180.f));
 
+    //Dealer's Decision
+    sf::Text dealerDecision(font);
+    dealerDecision.setFont(font);
+    dealerDecision.setCharacterSize(40);
+    dealerDecision.setString("Thinking...");
+    dealerDecision.setOutlineColor(sf::Color::Black);
+    dealerDecision.setOutlineThickness(5);
+    dealerDecision.setFillColor(sf::Color::White);
+    dealerDecision.setPosition(sf::Vector2f(560.f, 180.f));
 
+    int dealerChoice = dealerLogic(dealerScore, dealerDecision);
+    if (dealerChoice == 0) {
+        GameState = 1;
+    }
+    
+    
     //Updating the game
     while (window.isOpen()) {
 
@@ -355,8 +384,7 @@ int main() {
         {
             if (event->is<sf::Event::Closed>())
                 window.close();
-
-            if (const auto* mousePressed = event->getIf<sf::Event::MouseButtonPressed>()) {
+            else if (const auto* mousePressed = event->getIf<sf::Event::MouseButtonPressed>()) {
                 if (mousePressed->button == sf::Mouse::Button::Left) {
 
                     // Check if the click is inside the button
@@ -509,6 +537,7 @@ int main() {
                 }
             }
         }
+        
         //player wins
         if (GameState == 1) {
             playerMoney += pot;
@@ -528,10 +557,10 @@ int main() {
             pot = 0;
             potAwarded = true;
         }
-
+        
+        
         //Update pot text
         potText.setString("Pot: $" + std::to_string(pot));
-
         //Update player money
         playerMoneyText.setString("Your Money: $" + std::to_string(playerMoney));
 
@@ -594,6 +623,13 @@ int main() {
         window.draw(HelpText);
 
 
+        window.draw(Discard);
+        window.draw(Discard_Text);
+
+        window.draw(dealerDecision);
+
+
+      
         //Draw pot
         window.draw(potText);
 
@@ -627,131 +663,10 @@ int main() {
             //Draw player money
             window.draw(playerMoneyText);
         }
+        if (GameState != 0) {
+            window.draw(reset);
+        }
 
         window.display();
     }
-}
-
-//Functions related to game logic
-std::string handName(int score) {
-    if (score >= 900) return "Royal Flush";
-    if (score >= 800) return "Straight Flush";
-    if (score >= 700) return "Four of a Kind";
-    if (score >= 600) return "Full House";
-    if (score >= 500) return "Flush";
-    if (score >= 400) return "Straight";
-    if (score >= 300) return "Three of a Kind";
-    if (score >= 200) return "Two Pair";
-    if (score >= 100) return "One Pair";
-    return "High Card";
-}
-
-
-int rankValue(const std::string& rank) {
-    std::map<std::string, int> values = {
-        {"2", 2}, {"3", 3}, {"4", 4}, {"5", 5}, {"6", 6}, {"7", 7},
-        {"8", 8}, {"9", 9}, {"10", 10}, {"J", 11}, {"Q", 12}, {"K", 13}, {"A", 14}
-    };
-    return values[rank];
-}
-
-int evaluateHand(const std::vector<Card>& cards) {
-    std::map<int, int> valueCount;
-    std::map<std::string, std::vector<int>> suitToValues;
-    std::vector<int> values;
-
-    for (const auto& card : cards) {
-        int val = rankValue(card.getRank());
-        values.push_back(val);
-        valueCount[val]++;
-        suitToValues[card.getSuit()].push_back(val);
-    }
-
-    std::sort(values.begin(), values.end());
-    values.erase(std::unique(values.begin(), values.end()), values.end());
-
-    auto isStraight = [](const std::vector<int>& vals) {
-        if (vals.size() < 5) return false;
-        for (size_t i = 0; i <= vals.size() - 5; ++i) {
-            bool straight = true;
-            for (int j = 0; j < 4; ++j) {
-                if (vals[i + j] + 1 != vals[i + j + 1]) {
-                    straight = false;
-                    break;
-                }
-            }
-            if (straight) return true;
-        }
-        std::vector<int> wheel = { 2, 3, 4, 5, 14 };
-        return std::includes(vals.begin(), vals.end(), wheel.begin(), wheel.end());
-        };
-
-    // Flush and Straight Flush
-    for (const auto& pair : suitToValues) {
-        std::string suit = pair.first;
-        std::vector<int> valList = pair.second;
-
-        if (valList.size() >= 5) {
-            std::sort(valList.begin(), valList.end());
-            valList.erase(std::unique(valList.begin(), valList.end()), valList.end());
-
-            if (isStraight(valList)) {
-                if (std::find(valList.begin(), valList.end(), 14) != valList.end() &&
-                    std::find(valList.begin(), valList.end(), 10) != valList.end()) {
-                    return 900; // Royal Flush
-                }
-                return 800 + valList.back(); // Straight Flush
-            }
-            return 500 + valList.back(); // Flush
-        }
-    }
-
-    // Four of a Kind
-    for (const auto& pair : valueCount) {
-        int val = pair.first;
-        int count = pair.second;
-        if (count == 4) return 700 + val;
-    }
-
-    // Full House
-    int threeVal = 0, twoVal = 0;
-    for (const auto& pair : valueCount) {
-        int val = pair.first;
-        int count = pair.second;
-        if (count >= 3 && val > threeVal) threeVal = val;
-    }
-    for (const auto& pair : valueCount) {
-        int val = pair.first;
-        int count = pair.second;
-        if (count >= 2 && val != threeVal && val > twoVal) twoVal = val;
-    }
-    if (threeVal && twoVal) return 600 + threeVal;
-
-    // Straight
-    if (isStraight(values)) return 400 + values.back();
-
-    // Three of a Kind
-    for (const auto& pair : valueCount) {
-        int val = pair.first;
-        int count = pair.second;
-        if (count == 3) return 300 + val;
-    }
-
-    // Two Pair
-    std::vector<int> pairs;
-    for (const auto& pair : valueCount) {
-        int val = pair.first;
-        int count = pair.second;
-        if (count == 2) pairs.push_back(val);
-    }
-    if (pairs.size() >= 2) {
-        std::sort(pairs.begin(), pairs.end(), std::greater<int>());
-        return 200 + pairs[0];
-    }
-
-    // One Pair
-    if (!pairs.empty()) return 100 + pairs[0];
-
-    // High Card
-    return values.back();
 }
