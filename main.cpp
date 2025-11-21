@@ -12,7 +12,7 @@ int evaluateHand(const std::vector<Card>& cards);
 int main() {
     bool shouldDraw = false;  //THIS IS FOR THE HAND EVALUATION  
 
-
+    bool isSelected[5] = { false, false, false, false, false };
     bool drawOutline[5] = { false, false , false, false, false };
 
     unsigned int cardsSelected = 0;
@@ -98,7 +98,15 @@ int main() {
     checkT.setOutlineThickness(2);
     checkT.setFillColor(sf::Color::White);
     checkT.setPosition(sf::Vector2f(50.f, 200.f));
-
+    //Text for Discard
+    sf::Text Discard_Text(font);
+    Discard_Text.setFont(font);
+    Discard_Text.setString("Discard");
+    Discard_Text.setCharacterSize(28);
+    Discard_Text.setOutlineColor(sf::Color::Black);
+    Discard_Text.setOutlineThickness(2);
+    Discard_Text.setFillColor(sf::Color::White);
+    Discard_Text.setPosition(sf::Vector2f(1100.f, 400.f));
     // Text for Hand Rankings
     sf::Text Hand_Rankings_Text(font);
     Hand_Rankings_Text.setFont(font);
@@ -214,7 +222,7 @@ int main() {
 
     //Player Card 3
     sf::Texture card3;
-    if (!card3.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[0].getID() + 1) + ".png")) {
+    if (!card3.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[2].getID() + 1) + ".png")) {
         std::cerr << "Failed to load font\n";
         return -1;
     }
@@ -229,7 +237,7 @@ int main() {
 
     //Player Card 4
     sf::Texture card4;
-    if (!card4.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[0].getID() + 1) + ".png")) {
+    if (!card4.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[3].getID() + 1) + ".png")) {
         std::cerr << "Failed to load font\n";
         return -1;
     }
@@ -244,7 +252,7 @@ int main() {
 
     //Player Card 5
     sf::Texture card5;
-    if (!card5.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[0].getID() + 1) + ".png")) {
+    if (!card5.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[4].getID() + 1) + ".png")) {
         std::cerr << "Failed to load font\n";
         return -1;
     }
@@ -326,11 +334,8 @@ int main() {
     //Evaluate the player and the dealer hands
 
 
-    std::vector<Card> dealerTotal = dealerHand;
-    dealerTotal.insert(dealerTotal.end(), communityCards.begin(), communityCards.end());
-
-    int playerScore = evaluateHand(playerTotal);
-    int dealerScore = evaluateHand(dealerTotal);
+    int playerScore = evaluateHand(playerHand);
+    int dealerScore = evaluateHand(dealerHand);
 
     //Setup an announce for win/lost/tie
 
@@ -464,10 +469,12 @@ int main() {
                         if (drawOutline[0] == true) {
                             drawOutline[0] = false;
                             cardsSelected--;
+                            enabledCard[0] = false;
                         }
                         else if (cardsSelected < 3) {
                             drawOutline[0] = true;
                             cardsSelected++;
+                            enabledCard[0] = true;
                         }
                     }
 
@@ -479,10 +486,12 @@ int main() {
                         if (drawOutline[1] == true) {
                             drawOutline[1] = false;
                             cardsSelected--;
+                            enabledCard[1] = false;
                         }
                         else if (cardsSelected < 3) {
                             drawOutline[1] = true;
                             cardsSelected++;
+                            enabledCard[1] = true;
                         }
                     }
 
@@ -494,10 +503,12 @@ int main() {
                         if (drawOutline[2] == true) {
                             drawOutline[2] = false;
                             cardsSelected--;
+                            enabledCard[2] = false;
                         }
                         else if (cardsSelected < 3) {
                             drawOutline[2] = true;
                             cardsSelected++;
+                            enabledCard[2] = true;
                         }
                     }
 
@@ -509,10 +520,12 @@ int main() {
                         if (drawOutline[3] == true) {
                             drawOutline[3] = false;
                             cardsSelected--;
+                            enabledCard[3] = false;
                         }
                         else if (cardsSelected < 3) {
                             drawOutline[3] = true;
                             cardsSelected++;
+                            enabledCard[3] = true;
                         }
                     }
 
@@ -524,10 +537,97 @@ int main() {
                         if (drawOutline[4] == true) {
                             drawOutline[4] = false;
                             cardsSelected--;
+                            enabledCard[4] = false;
                         }
                         else if (cardsSelected < 3) {
                             drawOutline[4] = true;
                             cardsSelected++;
+                            enabledCard[4] = true;
+                        }
+                    }
+                    //discard button
+                    if (Discard.getGlobalBounds().contains(
+                        sf::Vector2f(static_cast<float>(mousePressed->position.x),
+                            static_cast<float>(mousePressed->position.y))))
+                    {
+                        if (!discarded) {
+                            for (int i = 0; i < 5; i++) {
+                                if (enabledCard[i]) {
+                                    playerHand[i] = deck.dealCard();
+                                    drawOutline[i] = 0;
+                                    cardsSelected--;
+                                    enabledCard[i] = 0;
+                                }
+                            }
+                            discarded = 1;
+                        }
+                        playerScore = evaluateHand(playerHand);
+                        playerhand.setString(handName(playerScore));
+                        if (!card1.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[0].getID() + 1) + ".png")) {
+                            std::cerr << "Failed to load font\n";
+                            return -1;
+                        }
+                        if (!card2.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[1].getID() + 1) + ".png")) {
+                            std::cerr << "Failed to load font\n";
+                            return -1;
+                        }
+                        if (!card3.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[2].getID() + 1) + ".png")) {
+                            std::cerr << "Failed to load font\n";
+                            return -1;
+                        }
+                        if (!card4.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[3].getID() + 1) + ".png")) {
+                            std::cerr << "Failed to load font\n";
+                            return -1;
+                        }
+                        if (!card5.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[4].getID() + 1) + ".png")) {
+                            std::cerr << "Failed to load font\n";
+                            return -1;
+                        }
+                    }
+                    //new game button
+                    if (reset.getGlobalBounds().contains(
+                        sf::Vector2f(static_cast<float>(mousePressed->position.x),
+                            static_cast<float>(mousePressed->position.y))))
+                    {
+                        pot += 50;
+                        playerMoney -= 25;
+                        dealerMoney -= 25;
+                        GameState = 0;
+                        discarded = 0;
+                        deck.shuffle();
+                        for (int i = 0; i < 5; i++) {
+                            playerHand[i] = deck.dealCard();
+                            dealerHand[i] = deck.dealCard();
+                        }
+                        
+                        playerScore = evaluateHand(playerHand);
+                        dealerScore = evaluateHand(dealerHand);
+                        dealerChoice = dealerLogic(dealerScore, dealerDecision);
+                        //Dealer's outcome
+                        if (dealerChoice == 0) {
+                            GameState = 1;
+                        }
+                        dealerhand.setString(handName(dealerScore));
+                        playerhand.setString(handName(playerScore));
+                        if (!card1.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[0].getID() + 1) + ".png")) {
+                            std::cerr << "Failed to load font\n";
+                            return -1;
+                        }
+                        if (!card2.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[1].getID() + 1) + ".png")) {
+                            std::cerr << "Failed to load font\n";
+                            return -1;
+                        }
+                        if (!card3.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[2].getID() + 1) + ".png")) {
+                            std::cerr << "Failed to load font\n";
+                            return -1;
+                        }
+                        if (!card4.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[3].getID() + 1) + ".png")) {
+                            std::cerr << "Failed to load font\n";
+                            return -1;
+                        }
+                        if (!card5.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[4].getID() + 1) + ".png")) {
+                            std::cerr << "Failed to load font\n";
+                            return -1;
                         }
                     }
 
@@ -591,13 +691,15 @@ int main() {
         if (drawOutline[4])
             window.draw(c5_Outline);
 
+
         //Draw Cards
         window.draw(card1S);
         window.draw(card2S);
         window.draw(card3S);
         window.draw(card4S);
         window.draw(card5S);
-
+       
+        
 
         window.draw(Dcard1S);
         window.draw(Dcard2S);
@@ -621,7 +723,6 @@ int main() {
 
         window.draw(Help);
         window.draw(HelpText);
-
 
         window.draw(Discard);
         window.draw(Discard_Text);
