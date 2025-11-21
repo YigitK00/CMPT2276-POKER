@@ -161,42 +161,42 @@ int dealerLogic(int dealerScore, sf::Text& decision)
             return 0;
         }
         else{
-            decision.setString("dealer's checked");
+            decision.setString("dealer's checked, they look unconfident");
             return 1;
         }
     }
     else if (dealerScore < 300) {
         if (dice <= 75) {
-            decision.setString("dealer's checked");
+            decision.setString("dealer's checked, they look normal");
             return 1;
         }
         else {
-            decision.setString("dealer's raised");
+            decision.setString("dealer's raised, they seems normal");
             return 2;
         }
     }
     else if (dealerScore < 400) {
         if (dice <= 50) {
-            decision.setString("dealer's checked");
+            decision.setString("dealer's checked, they seems normal");
             return 1;
         }
         else {
-            decision.setString("dealer's raised");
+            decision.setString("dealer's raised, they seems confident");
             return 2;
         }
     }
     else if (dealerScore < 500) {
         if (dice <= 25) {
-            decision.setString("dealer's checked");
+            decision.setString("dealer's checked, they seems confident");
             return 1;
         }
         else {
-            decision.setString("dealer's raised");
+            decision.setString("dealer's raised, they seems confident");
             return 2;
         }
     }
     else if (dealerScore > 500) {
-        decision.setString("dealer's raised");
+        decision.setString("dealer's raised, they seems very confident");
         return 2;
     }
     return 0;
