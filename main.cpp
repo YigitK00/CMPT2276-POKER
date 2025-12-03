@@ -14,6 +14,7 @@ int main() {
 
     bool isSelected[5] = { false, false, false, false, false };
     bool drawOutline[5] = { false, false , false, false, false };
+    bool do_once = false;
 
     unsigned int cardsSelected = 0;
 
@@ -481,13 +482,16 @@ int main() {
                             enabledCard[4] = drawOutline[4];
                             cardsSelected += drawOutline[4] ? 1 : -1;
                         }
-                        dealerChoice = dealerLogic(dealerScore, dealerDecision);
-                        window.draw(dealerDecision);
+                        if (!do_once) {
+                            dealerChoice = dealerLogic(dealerScore, dealerDecision);
+                            window.draw(dealerDecision);
+                            do_once = 1;
 
-                        if (dealerChoice == 0) {
-                            window.display();
-                            std::this_thread::sleep_for(std::chrono::seconds(2));
-                            GameState = 1;
+                            if (dealerChoice == 0) {
+                                window.display();
+                                std::this_thread::sleep_for(std::chrono::seconds(2));
+                                GameState = 1;
+                            }
                         }
 
                         
