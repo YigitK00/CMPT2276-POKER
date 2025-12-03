@@ -13,6 +13,7 @@ int main() {
 
     bool isSelected[5] = { false, false, false, false, false };
     bool drawOutline[5] = { false, false , false, false, false };
+    bool do_once = 0;
 
     unsigned int cardsSelected = 0;
 
@@ -494,16 +495,19 @@ int main() {
                             enabledCard[4] = drawOutline[4];
                             cardsSelected += drawOutline[4] ? 1 : -1;
                         }
-                        dealerChoice = dealerLogic(dealerScore, dealerDecision);
-                        window.draw(dealerDecision);
-
-                        if (dealerChoice == 0) {
-                            window.display();
-                            std::this_thread::sleep_for(std::chrono::seconds(2));
-                            GameState = 1;
-                        }
-
                         
+                        if (!do_once) {
+                            dealerChoice = dealerLogic(dealerScore, dealerDecision);
+                            window.draw(dealerDecision);
+                            do_once = 1;
+                            if (dealerChoice == 0) {
+                                window.display();
+                                std::this_thread::sleep_for(std::chrono::seconds(2));
+                                GameState = 1;
+                                currentPhase = Phase::Showdown;
+                            }
+
+                        }
                         //discard button
                         if (Discard.getGlobalBounds().contains(
                             sf::Vector2f(static_cast<float>(mousePressed->position.x),
@@ -543,11 +547,11 @@ int main() {
 
                         // Showdown Phase
                         if (currentPhase == Phase::Showdown) {
-                            if (GameState == 0) {
+
+                            
                                 if (playerScore > dealerScore) GameState = 1;
                                 else if (playerScore < dealerScore) GameState = 2;
                                 else GameState = 3; // tie
-                            }
                         
 
                         //new game button
