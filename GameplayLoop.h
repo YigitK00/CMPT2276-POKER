@@ -7,11 +7,17 @@
 #include <algorithm>
 #include <map>
 #include <SFML/Graphics.hpp>
+#include <thread> // Required for std::this_thread::sleep_for
+#include <chrono> // Required for std::chrono::seconds, milliseconds, etc.
 
 int evaluateHand(const std::vector<Card>& cards);
 int rankValue(const std::string& rank);
 void resetRound(int gameState, Deck& newDeck, std::vector<Card>& newPhand, std::vector<Card>& newDhand);
 int dealerLogic(int dealerScore, sf::Text& decision);
+int hintLogic(const int playerScore, sf::Text& hint, const bool discarded, const std::vector<Card> playerhand);
+void revealCards(sf::Texture &Dcard, const std::vector<Card> &Dhand,int i);
+void hideCard(sf::Texture& card);
+int convertRankToInt(std::string rank);
 
 //Game Logic Functions
 std::string handName(int score) {
@@ -199,5 +205,129 @@ int dealerLogic(int dealerScore, sf::Text& decision)
         decision.setString("dealer's raised, they seems very confident");
         return 2;
     }
+    
+    return 0;
+}
+
+
+
+void revealCards(sf::Texture& card, const std::vector<Card>& hand, int i) {
+
+      std::ignore = card.loadFromFile("./playing-cards-master/" + std::to_string(hand[i].getID() + 1) + ".png");
+}
+
+void hideCard(sf::Texture& card)
+{
+    std::ignore = card.loadFromFile("./playing-cards-master/zLightBack.png");
+}
+
+int convertRankToInt(std::string rank)
+{
+    if (rank == "A") {
+        return 14;
+    }
+    else if (rank == "K") {
+        return 13;
+    }
+    else if (rank == "Q") {
+        return 12;
+    }
+    else if (rank == "J") {
+        return 11;
+    }
+    else
+        return std::stoi(rank);
+
+    return 0;
+}
+
+int hintLogic(const int playerScore, sf::Text& hintText, const bool discarded, const std::vector<Card> playerhand)
+{
+    std::string hint;
+    int sameSuit[4] = { 0, 0, 0, 0 };
+    bool straightDraw = false;
+    std::vector<int> ranks;
+    if (playerScore < 200) {
+        hint += "Your hand is very weak. Consider folding unless pot is small.";
+    }
+    else if (playerScore < 300) {
+        hint += "You only have a marginal hand. Play cautiously or check.";
+    }
+    else if (playerScore < 400) {
+        hint += "You have a moderate hand. Calling is reasonable, but avoid big raises.";
+    }
+    else if (playerScore < 500) {
+        hint += "Your hand is decent. You can call or make small raises.";
+    }
+    else if (playerScore < 600) {
+        hint += "You have a strong hand. Aggressive play is recommended.";
+    }
+    else if (playerScore < 700) {
+        hint += "Very strong hand. Raising is a solid option.";
+    }
+    else if (playerScore < 800) {
+        hint += "Excellent handfeel confident. Consider big raises.";
+    }
+    else if (playerScore < 900) {
+        hint += "Near-perfect hand. You should play aggressively.";
+    }
+    else {
+        hint += "Royal Flush  bet as much as possible!";
+    }
+    for (int i = 0; i < 5; i++) {
+        std::string temp;
+        temp = playerhand[i].getSuit();
+        if (temp == "Spades") {
+            sameSuit[0] += 1;
+        }
+        else if (temp == "Diamonds") {
+            sameSuit[1] += 1;
+        }
+        else if (temp == "Hearts") {
+            sameSuit[2] += 1;
+        }
+        else {
+            sameSuit[3] += 1;
+        }
+    }
+    for (int i = 0; i < 4; i++) {
+        if (sameSuit[i] == 3) {
+            hint += " \nYou can also discard 2 cards for a potential flush";
+            break;
+        }
+        else if (sameSuit[i] == 4) {
+            hint += " \nYou can discard 1 card for flush";
+            break;
+        }
+    }
+    for (int i = 0; i < 5; i++) {
+        ranks.push_back(convertRankToInt(playerhand[i].getRank()));
+    }
+    std::sort(ranks.begin(), ranks.end());
+    ranks.erase(std::unique(ranks.begin(), ranks.end()), ranks.end());
+    if (ranks.size() < 3) {
+        straightDraw = false;
+    }
+    for (int i = 0; i < (int)ranks.size() - 1; i++) {
+        int count = 1;
+        int last = ranks[i];
+
+        for (int j = i + 1; j < (int)ranks.size(); j++) {
+            if (ranks[j] == last + 1) {
+                count++;
+                last = ranks[j];
+            }
+        }
+
+        if (count >= 3) {
+            straightDraw = true;
+        }
+    }
+    if (straightDraw) {
+        hint += " \nAnother option is to discard for straight";
+    }
+    
+    hintText.setString(hint);
+
     return 0;
 }
