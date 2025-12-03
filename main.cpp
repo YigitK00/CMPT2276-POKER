@@ -2,6 +2,7 @@
 #include <iostream>
 #include <algorithm>
 #include "Deck.h"
+#include "UI.h"
 #include "GameplayLoop.h"
 #include <thread>
 #include <chrono>
@@ -12,7 +13,7 @@ int evaluateHand(const std::vector<Card>& cards);
 int main() {
     bool shouldDraw = false;  //THIS IS FOR THE HAND EVALUATION  
 
-
+    bool isSelected[5] = { false, false, false, false, false };
     bool drawOutline[5] = { false, false , false, false, false };
 
     unsigned int cardsSelected = 0;
@@ -21,48 +22,62 @@ int main() {
     sf::RenderWindow window(sf::VideoMode({ 1280u, 720u }), "Poker");
     //Raise, fold buttons
 
-    sf::RectangleShape raise(sf::Vector2f(100.f, 100.f));
-    raise.setPosition(sf::Vector2f(50.f, 600.f));
-    raise.setFillColor(sf::Color::Green);
-    raise.setOutlineColor(sf::Color::Black);
-    raise.setOutlineThickness(4);
+    const float BTN_W = 100.f;
+    const float BTN_H = 100.f;
 
-    sf::RectangleShape fold(sf::Vector2f(100.f, 100.f));
-    fold.setPosition(sf::Vector2f(50.f, 400.f));
-    fold.setFillColor(sf::Color::Red);
-    fold.setOutlineColor(sf::Color::Black);
-    fold.setOutlineThickness(4);
+    const float BTN_X = 50.f;
+    const float BTN_Y = 600.f;
 
-    // Check/Call button
-    sf::RectangleShape check(sf::Vector2f(100.f, 100.f));
-    check.setPosition(sf::Vector2f(50.f, 200.f));
-    check.setFillColor(sf::Color::Yellow);
-    check.setOutlineColor(sf::Color::Black);
-    check.setOutlineThickness(4);
-    //New round button
-    sf::RectangleShape reset(sf::Vector2f(100.f, 100.f));
-    reset.setPosition(sf::Vector2f(640.f, 300.f));
-    reset.setFillColor(sf::Color::Green);
-    reset.setOutlineColor(sf::Color::Black);
-    reset.setOutlineThickness(4);
-    //Discard button
-    sf::RectangleShape Discard(sf::Vector2f(100.f, 100.f));
-    Discard.setPosition(sf::Vector2f(1100.f, 400.f));
-    Discard.setFillColor(sf::Color::Yellow);
-    Discard.setOutlineColor(sf::Color::Black);
-    Discard.setOutlineThickness(4);
-    // Hand_Rankings
-    sf::RectangleShape Hand_Rankings(sf::Vector2f(100.f, 100.f));
-    Hand_Rankings.setPosition(sf::Vector2f(1100.f, 600.f));
-    Hand_Rankings.setFillColor(sf::Color::Yellow);
-    Hand_Rankings.setOutlineColor(sf::Color::Black);
-    Hand_Rankings.setOutlineThickness(4);
+    const float RIGHT_X = 1100.f;
+    const float RIGHT_Y = 400.f;
 
-    sf::RectangleShape Help(sf::Vector2f(100.f, 100.f));
-    Help.setPosition(sf::Vector2f(900.f, 600.f));
-    Help.setFillColor(sf::Color::Green);
-    Help.setOutlineColor(sf::Color::Black);
-    Help.setOutlineThickness(4);
+    const float HELP_X = 900.f;
+    const float HELP_Y = 600.f;
+
+    const float RESET_X = 640.f;
+    const float RESET_Y = 300.f;
+
+    sf::RectangleShape raise = createButton(
+        {BTN_X, BTN_Y},
+        {BTN_W, BTN_H},
+        sf::Color::Green
+    );
+
+    sf::RectangleShape fold = createButton(
+        {BTN_X, BTN_Y - 200.f},
+        {BTN_W, BTN_H},
+        sf::Color::Red
+    );
+
+    sf::RectangleShape check = createButton(
+        {BTN_X, BTN_Y - 400.f},
+        {BTN_W, BTN_H},
+        sf::Color::Yellow
+    );
+
+    sf::RectangleShape reset = createButton(
+        {RESET_X, RESET_Y},
+        {BTN_W, BTN_H},
+        sf::Color::Green
+    );
+
+    sf::RectangleShape Discard = createButton(
+        {RIGHT_X, BTN_Y - 200.f},
+        {BTN_W, BTN_H},
+        sf::Color::Yellow
+    );
+
+    sf::RectangleShape Hand_Rankings = createButton(
+        {RIGHT_X, BTN_Y},
+        {BTN_W, BTN_H},
+        sf::Color::Yellow
+    );
+
+    sf::RectangleShape Help = createButton(
+        {RIGHT_X - 200.f, BTN_Y},
+        {BTN_W, BTN_H},
+        sf::Color::Green
+    );
 
     // load font
     sf::Font font;
@@ -70,73 +85,69 @@ int main() {
         return -1;
     }
 
-    //Text for raise, fold buttons
-    sf::Text foldT(font);
-    foldT.setFont(font);
-    foldT.setString("FOLD");
-    foldT.setCharacterSize(28);
-    foldT.setOutlineColor(sf::Color::Black);
-    foldT.setOutlineThickness(2);
-    foldT.setFillColor(sf::Color::White);
-    foldT.setPosition(sf::Vector2f(50.f, 400.f));
+    // Fold text
+    sf::Text foldT = createText(
+        font,
+        "FOLD",
+        28,
+        {BTN_X, BTN_Y - 200.f}
+    );
 
-    sf::Text raiseT(font);
-    raiseT.setFont(font);
-    raiseT.setString("RAISE \n (-50$)");
-    raiseT.setCharacterSize(28);
-    raiseT.setOutlineColor(sf::Color::Black);
-    raiseT.setOutlineThickness(2);
-    raiseT.setFillColor(sf::Color::White);
-    raiseT.setPosition(sf::Vector2f(60.f, 600.f));
+    // Raise text
+    sf::Text raiseT = createText(
+        font,
+        "RAISE \n (-50$)",
+        28,
+        {BTN_X + 10.f, BTN_Y}
+    );
 
-    // Text for Check/Call button
-    sf::Text checkT(font);
-    checkT.setFont(font);
-    checkT.setString("CHECK\n      /\nCALL(-25$) \n");
-    checkT.setCharacterSize(28);
-    checkT.setOutlineColor(sf::Color::Black);
-    checkT.setOutlineThickness(2);
-    checkT.setFillColor(sf::Color::White);
-    checkT.setPosition(sf::Vector2f(50.f, 200.f));
+    // Check / Call text
+    sf::Text checkT = createText(
+        font,
+        "CHECK\n/\nCALL(-25$)",
+        28,
+        {BTN_X, BTN_Y - 400.f}
+    );
 
-    // Text for Hand Rankings
-    sf::Text Hand_Rankings_Text(font);
-    Hand_Rankings_Text.setFont(font);
-    Hand_Rankings_Text.setString("HAND\n      \n Eval");
-    Hand_Rankings_Text.setCharacterSize(28);
-    Hand_Rankings_Text.setOutlineColor(sf::Color::Black);
-    Hand_Rankings_Text.setOutlineThickness(2);
-    Hand_Rankings_Text.setFillColor(sf::Color::White);
-    Hand_Rankings_Text.setPosition(sf::Vector2f(1110.f, 600.f));
+    // Discard text
+    sf::Text Discard_Text = createText(
+        font,
+        "Discard",
+        28,
+        {RIGHT_X, RIGHT_Y}
+    );
 
-    sf::Text HelpText(font);
-    HelpText.setFont(font);
-    HelpText.setString("Suggest");
-    HelpText.setCharacterSize(28);
-    HelpText.setOutlineColor(sf::Color::Black);
-    HelpText.setOutlineThickness(2);
-    HelpText.setFillColor(sf::Color::White);
-    HelpText.setPosition(sf::Vector2f(900.f, 600.f));
+    // Hand Rankings text
+    sf::Text Hand_Rankings_Text = createText(
+        font,
+        "HAND\n\nEval",
+        28,
+        {RIGHT_X + 10.f, BTN_Y}
+    );
 
+    // Help/Suggest text
+    sf::Text HelpText = createText(
+        font,
+        "Suggest",
+        28,
+        {HELP_X, HELP_Y}
+    );
 
-    // Text for pot
-    sf::Text potText(font);
-    potText.setFont(font);
-    potText.setCharacterSize(32);
-    potText.setFillColor(sf::Color::White);
-    potText.setOutlineColor(sf::Color::Black);
-    potText.setOutlineThickness(2);
-    potText.setPosition(sf::Vector2(1050.f, 50.f));
+    // Pot text (static position)
+    sf::Text potText = createText(
+        font,
+        "",
+        32,
+        {1050.f, 50.f}
+    );
 
-    // Text for player money
-    sf::Text playerMoneyText(font);
-    playerMoneyText.setFont(font);
-    playerMoneyText.setCharacterSize(28);
-    playerMoneyText.setFillColor(sf::Color::White);
-    playerMoneyText.setOutlineColor(sf::Color::Black);
-    playerMoneyText.setOutlineThickness(2);
-    playerMoneyText.setPosition(sf::Vector2(50.f, 50.f));
-
+    // Player money text (static position)
+    sf::Text playerMoneyText = createText(
+        font,
+        "",
+        28,
+        {50.f, 50.f}
+    );
 
     //Set background table to table
     sf::Texture backgroundTexture;
@@ -214,7 +225,7 @@ int main() {
 
     //Player Card 3
     sf::Texture card3;
-    if (!card3.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[0].getID() + 1) + ".png")) {
+    if (!card3.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[2].getID() + 1) + ".png")) {
         std::cerr << "Failed to load font\n";
         return -1;
     }
@@ -229,7 +240,7 @@ int main() {
 
     //Player Card 4
     sf::Texture card4;
-    if (!card4.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[0].getID() + 1) + ".png")) {
+    if (!card4.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[3].getID() + 1) + ".png")) {
         std::cerr << "Failed to load font\n";
         return -1;
     }
@@ -244,7 +255,7 @@ int main() {
 
     //Player Card 5
     sf::Texture card5;
-    if (!card5.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[0].getID() + 1) + ".png")) {
+    if (!card5.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[4].getID() + 1) + ".png")) {
         std::cerr << "Failed to load font\n";
         return -1;
     }
@@ -326,50 +337,50 @@ int main() {
     //Evaluate the player and the dealer hands
 
 
-    std::vector<Card> dealerTotal = dealerHand;
-    dealerTotal.insert(dealerTotal.end(), communityCards.begin(), communityCards.end());
+    int playerScore = evaluateHand(playerHand);
+    int dealerScore = evaluateHand(dealerHand);
 
-    int playerScore = evaluateHand(playerTotal);
-    int dealerScore = evaluateHand(dealerTotal);
+    // Setup an announce for win/lost/tie
+    sf::Text result = createText(
+        font,
+        "",                                // will be set to "You Won!" / etc. later
+        40,
+        {320.f, 360.f},
+        sf::Color::White,
+        sf::Color::Black,
+        5.f
+    );
 
-    //Setup an announce for win/lost/tie
+    sf::Text dealerhand = createText(
+        font,
+        handName(dealerScore),
+        40,
+        {300.f, 180.f},             // moved LEFT & up
+        sf::Color::White,
+        sf::Color::Black,
+        5.f
+    );
 
-    sf::Text result(font);
-    result.setFont(font);
-    result.setCharacterSize(40);
-    result.setOutlineColor(sf::Color::Black);
-    result.setOutlineThickness(5);
-    result.setFillColor(sf::Color::White);
-    result.setPosition(sf::Vector2f(320.f, 360.f));
+    sf::Text playerhand = createText(
+        font,
+        handName(playerScore),
+        40,
+        {300.f, 540.f},            // moved LEFT & down
+        sf::Color::White,
+        sf::Color::Black,
+        5.f
+    );
 
-    //Setup to display hands after playing
-    sf::Text playerhand(font);
-    playerhand.setFont(font);
-    playerhand.setCharacterSize(40);
-    playerhand.setString(handName(playerScore));
-    playerhand.setOutlineColor(sf::Color::Black);
-    playerhand.setOutlineThickness(5);
-    playerhand.setFillColor(sf::Color::White);
-    playerhand.setPosition(sf::Vector2f(560.f, 540.f));
-
-    sf::Text dealerhand(font);
-    dealerhand.setFont(font);
-    dealerhand.setCharacterSize(40);
-    dealerhand.setString(handName(dealerScore));
-    dealerhand.setOutlineColor(sf::Color::Black);
-    dealerhand.setOutlineThickness(5);
-    dealerhand.setFillColor(sf::Color::White);
-    dealerhand.setPosition(sf::Vector2f(560.f, 180.f));
-
-    //Dealer's Decision
-    sf::Text dealerDecision(font);
-    dealerDecision.setFont(font);
-    dealerDecision.setCharacterSize(40);
-    dealerDecision.setString("Thinking...");
-    dealerDecision.setOutlineColor(sf::Color::Black);
-    dealerDecision.setOutlineThickness(5);
-    dealerDecision.setFillColor(sf::Color::White);
-    dealerDecision.setPosition(sf::Vector2f(560.f, 180.f));
+    // Dealer's Decision
+    sf::Text dealerDecision = createText(
+        font,
+        "Thinking...",
+        40,
+        {560.f, 180.f},
+        sf::Color::White,
+        sf::Color::Black,
+        5.f
+    );
 
     int dealerChoice = dealerLogic(dealerScore, dealerDecision);
     if (dealerChoice == 0) {
@@ -464,10 +475,12 @@ int main() {
                         if (drawOutline[0] == true) {
                             drawOutline[0] = false;
                             cardsSelected--;
+                            enabledCard[0] = false;
                         }
                         else if (cardsSelected < 3) {
                             drawOutline[0] = true;
                             cardsSelected++;
+                            enabledCard[0] = true;
                         }
                     }
 
@@ -479,10 +492,12 @@ int main() {
                         if (drawOutline[1] == true) {
                             drawOutline[1] = false;
                             cardsSelected--;
+                            enabledCard[1] = false;
                         }
                         else if (cardsSelected < 3) {
                             drawOutline[1] = true;
                             cardsSelected++;
+                            enabledCard[1] = true;
                         }
                     }
 
@@ -494,10 +509,12 @@ int main() {
                         if (drawOutline[2] == true) {
                             drawOutline[2] = false;
                             cardsSelected--;
+                            enabledCard[2] = false;
                         }
                         else if (cardsSelected < 3) {
                             drawOutline[2] = true;
                             cardsSelected++;
+                            enabledCard[2] = true;
                         }
                     }
 
@@ -509,10 +526,12 @@ int main() {
                         if (drawOutline[3] == true) {
                             drawOutline[3] = false;
                             cardsSelected--;
+                            enabledCard[3] = false;
                         }
                         else if (cardsSelected < 3) {
                             drawOutline[3] = true;
                             cardsSelected++;
+                            enabledCard[3] = true;
                         }
                     }
 
@@ -524,10 +543,97 @@ int main() {
                         if (drawOutline[4] == true) {
                             drawOutline[4] = false;
                             cardsSelected--;
+                            enabledCard[4] = false;
                         }
                         else if (cardsSelected < 3) {
                             drawOutline[4] = true;
                             cardsSelected++;
+                            enabledCard[4] = true;
+                        }
+                    }
+                    //discard button
+                    if (Discard.getGlobalBounds().contains(
+                        sf::Vector2f(static_cast<float>(mousePressed->position.x),
+                            static_cast<float>(mousePressed->position.y))))
+                    {
+                        if (!discarded) {
+                            for (int i = 0; i < 5; i++) {
+                                if (enabledCard[i]) {
+                                    playerHand[i] = deck.dealCard();
+                                    drawOutline[i] = 0;
+                                    cardsSelected--;
+                                    enabledCard[i] = 0;
+                                }
+                            }
+                            discarded = 1;
+                        }
+                        playerScore = evaluateHand(playerHand);
+                        playerhand.setString(handName(playerScore));
+                        if (!card1.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[0].getID() + 1) + ".png")) {
+                            std::cerr << "Failed to load font\n";
+                            return -1;
+                        }
+                        if (!card2.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[1].getID() + 1) + ".png")) {
+                            std::cerr << "Failed to load font\n";
+                            return -1;
+                        }
+                        if (!card3.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[2].getID() + 1) + ".png")) {
+                            std::cerr << "Failed to load font\n";
+                            return -1;
+                        }
+                        if (!card4.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[3].getID() + 1) + ".png")) {
+                            std::cerr << "Failed to load font\n";
+                            return -1;
+                        }
+                        if (!card5.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[4].getID() + 1) + ".png")) {
+                            std::cerr << "Failed to load font\n";
+                            return -1;
+                        }
+                    }
+                    //new game button
+                    if (reset.getGlobalBounds().contains(
+                        sf::Vector2f(static_cast<float>(mousePressed->position.x),
+                            static_cast<float>(mousePressed->position.y))))
+                    {
+                        pot += 50;
+                        playerMoney -= 25;
+                        dealerMoney -= 25;
+                        GameState = 0;
+                        discarded = 0;
+                        deck.shuffle();
+                        for (int i = 0; i < 5; i++) {
+                            playerHand[i] = deck.dealCard();
+                            dealerHand[i] = deck.dealCard();
+                        }
+                        
+                        playerScore = evaluateHand(playerHand);
+                        dealerScore = evaluateHand(dealerHand);
+                        dealerChoice = dealerLogic(dealerScore, dealerDecision);
+                        //Dealer's outcome
+                        if (dealerChoice == 0) {
+                            GameState = 1;
+                        }
+                        dealerhand.setString(handName(dealerScore));
+                        playerhand.setString(handName(playerScore));
+                        if (!card1.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[0].getID() + 1) + ".png")) {
+                            std::cerr << "Failed to load font\n";
+                            return -1;
+                        }
+                        if (!card2.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[1].getID() + 1) + ".png")) {
+                            std::cerr << "Failed to load font\n";
+                            return -1;
+                        }
+                        if (!card3.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[2].getID() + 1) + ".png")) {
+                            std::cerr << "Failed to load font\n";
+                            return -1;
+                        }
+                        if (!card4.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[3].getID() + 1) + ".png")) {
+                            std::cerr << "Failed to load font\n";
+                            return -1;
+                        }
+                        if (!card5.loadFromFile("./playing-cards-master/" + std::to_string(playerHand[4].getID() + 1) + ".png")) {
+                            std::cerr << "Failed to load font\n";
+                            return -1;
                         }
                     }
 
@@ -591,13 +697,15 @@ int main() {
         if (drawOutline[4])
             window.draw(c5_Outline);
 
+
         //Draw Cards
         window.draw(card1S);
         window.draw(card2S);
         window.draw(card3S);
         window.draw(card4S);
         window.draw(card5S);
-
+       
+        
 
         window.draw(Dcard1S);
         window.draw(Dcard2S);
@@ -621,7 +729,6 @@ int main() {
 
         window.draw(Help);
         window.draw(HelpText);
-
 
         window.draw(Discard);
         window.draw(Discard_Text);
